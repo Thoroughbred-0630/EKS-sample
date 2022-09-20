@@ -204,9 +204,10 @@ index.htmlを見れるようにしてある
 
 
 ## 作成したDockerのimageをAWSにアップロード
-アップロード先としてERC(Elastic Container Registry)を利用
+アップロード先としてECR(Elastic Container Registry)を利用
 
 コンソールのレジストリの作成からプライベートリポジトリを作成
+*リポジトリ：同じ名前のDocker imageの集まり
 
 - 可視性設定
 
@@ -218,18 +219,79 @@ index.htmlを見れるようにしてある
 タグの上書きを防止する(同じタグではimageをpushできなくなる)
 
 ### 作成したプライベートリポジトリにアップロード
+作成したリポジトリにログイン
+```
+aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${region}.amazonaws.com
+```
 
+作成したリポジトリにアップロードできるようにタグを編集
+```
+docker tag ${image_name} ${aws_account_id}.dkr.ecr.${region}.amazonaws.com/${my-repository}:${tag}
+```
+
+ECRにimageをpush
+```
+docker push ${aws_account_id}.dkr.ecr.${region}.amazonaws.com/${my-repository}:${tag}
+```
+*コンソールのpushコマンド表示をコピペすれば良い
 
 ### codecommitの設定
-リポジトリの作成
+<!-- リポジトリの作成
 - Amazon CodeGuru Reviewer for Java and Python
 
-JavaとPythonのコードレビューを自動で行ってくれる
+JavaとPythonのコードレビューを自動で行ってくれる -->
 
 ## codeBuildの設定(Build1分あたりに課金)
 ビルドプロジェクトを作成する
 - ソース
 githubを選択、認証して対象のリポジトリを選択
+
+- プライマリーソースのウェブフックイベント
+
+githubのどのイベント、どのブランチを使うかを設定
+
+ACTOR_ID：誰が行った動作かを限定することができる
+
+BASE_REF：refs/heads/${branch_name}で使用するブランチを決定できる
+
+ソースコード内のbuildspec.yamlファイルを探してbuildを実行してくれる
+
+buildspec.yaml
+```yaml
+version: 0.2
+
+#envはコンソール上で埋め込む方が良い
+#より適切なのは、KMS等を利用してアカウントIDを隠すこと
+env:
+  variables:
+    AWS_ACCOUNT_ID: [$AWS_account_id]
+    AWS_DEEFAULT_REGION: ap-northeast-1
+    IMAGE_REPO_NAME: eks-private-repository
+
+phases:
+  prebuild:
+    commands:
+      - echo login ECR
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.AWS_DEFAULT_REGION.amazonaws.com
+      - export IMAGE_TAG="v1"
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image
+      - cd $CODEBUILD_SRC_DIR/ #接続したgithubのディレクトリ構造
+      - docker build -t $IMAGE_REPO_NAME .
+      - docker tag eks-private-repository:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Push completed on `date`
+```
+
+- アーティファクト
+
+buildした結果を保存する先
 
 残り
 - Dockerfileのローカルチェック
