@@ -157,6 +157,14 @@ kubectl get service
 ## ノードの作成
 ノードグループを作成する
 
+*public IPの自動割り当てを有効にしておく
+
+構成情報を確認
+```
+kubectl describe nodes
+```
+
+
 ### マネージドで実施する場合(EC2)
 ノードグループにIAMロールを割り当てる
 
