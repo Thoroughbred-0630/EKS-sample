@@ -295,22 +295,34 @@ buildした結果を保存する先
 
 - ロールの作成
 
-ECRにアクセスできる権限をcodebuildに付与する必要がある
+ECRとEKRにアクセスできる権限をcodebuildに付与する必要がある
 
 デフォルトで作成されたロールに追記
 ```json
-    {
-        "Action": [
-            "ecr:BatchCheckLayerAvailability",
-            "ecr:CompleteLayerUpload",
-            "ecr:GetAuthorizationToken",
-            "ecr:InitiateLayerUpload",
-            "ecr:PutImage",
-            "ecr:UploadLayerPart"
-        ],
-        "Resource": "*",
-        "Effect": "Allow"
-    }
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:UploadLayerPart",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "eks:DescribeCluster",
+            "Resource": "arn:aws:eks:*:*:cluster/*"
+        }
+    ]
+}
 ```
 
 buildを実行して確認
