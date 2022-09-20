@@ -293,6 +293,28 @@ phases:
 
 buildした結果を保存する先
 
+- ロールの作成
+
+ECRにアクセスできる権限をcodebuildに付与する必要がある
+
+デフォルトで作成されたロールに追記
+```json
+    {
+        "Action": [
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:CompleteLayerUpload",
+            "ecr:GetAuthorizationToken",
+            "ecr:InitiateLayerUpload",
+            "ecr:PutImage",
+            "ecr:UploadLayerPart"
+        ],
+        "Resource": "*",
+        "Effect": "Allow"
+    }
+```
+
+buildを実行して確認
+
 残り
 - Dockerfileのローカルチェック
 - CodePipeline設定、メモ作成
