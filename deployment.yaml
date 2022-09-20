@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-eks
+  labels:
+    app: eks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eks
+  template:
+    metadata:
+      labels:
+        app: eks
+    spec:
+      containers:
+      - name: eks-container
+        image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/eks-private-repository:v0.2
+        ports:
+        - containerPort: 80
