@@ -315,8 +315,10 @@ ECRにアクセスできる権限をcodebuildに付与する必要がある
 
 buildを実行して確認
 
+
+## codeDeployの設定
+
+
 残り
-- Dockerfileのローカルチェック
-- CodePipeline設定、メモ作成
 - EKS+Codepipelineで変更できるか確認
 - 構成図の画像作成
