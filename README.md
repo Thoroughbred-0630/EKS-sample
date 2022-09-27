@@ -271,6 +271,7 @@ index.htmlを見れるようにしてある
 
 タグの上書きを防止する(同じタグではimageをpushできなくなる)
 
+
 ### 作成したプライベートリポジトリにアップロード
 作成したリポジトリにログイン
 ```
@@ -305,9 +306,13 @@ githubのどのイベント、どのブランチを使うかを設定
 
 ACTOR_ID：誰が行った動作かを限定することができる
 
-BASE_REF：refs/heads/${branch_name}で使用するブランチを決定できる
+<!-- BASE_REF：refs/heads/${branch_name}で使用するブランチを決定できる -->
+HEAD_REF: ^refs/heads/main$でmainにイベントが発生したとき
 
 ソースコード内のbuildspec.yamlファイルを探してbuildを実行してくれる
+
+- 特権付与
+これにチェックを入れないとDockerfileを取ってこれない
 
 buildspec.yaml
 ```yaml
@@ -333,7 +338,7 @@ phases:
       - echo Building the Docker image
       - cd $CODEBUILD_SRC_DIR/ #接続したgithubのディレクトリ構造
       - docker build -t $IMAGE_REPO_NAME .
-      - docker tag eks-private-repository:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
   post_build:
     commands:
       - echo Build completed on `date`
