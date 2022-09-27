@@ -382,7 +382,6 @@ ECRとEKRにアクセスできる権限をcodebuildに付与する必要があ�
 }
 ```
 
-
 ## CodepipelineとEKSの接続
 
 deploymentとserviceをcodebuildから実行する
