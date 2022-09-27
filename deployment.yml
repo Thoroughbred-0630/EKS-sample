@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: eks-container
-        image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/sample-eks:v0.2
+        image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/eks:v0.2
         ports:
         - protocol: TCP
           8080

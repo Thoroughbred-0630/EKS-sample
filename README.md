@@ -173,7 +173,6 @@ Amazon EKS リソースの VPC の範囲と重複しない
 
 ## CLIを利用してクラスタに接続
 
-kotirasannkou
 
 ローカルでAWS上に作成したクラスタを操作可能にするためにconfigを設定
 ```bash
@@ -183,7 +182,7 @@ aws eks update-kubeconfig --region ap-northeast-1 --name EKS-test
 ```
 cat ~/.kube/config
 ```
-AWS上に展開されているクラスタのサービス(？？)の状態を確認
+AWS上に展開されているクラスタのサービスの状態を確認
 ```
 kubectl get service
 ```
@@ -381,6 +380,95 @@ ECRとEKRにアクセスできる権限をcodebuildに付与する必要があ�
         }
     ]
 }
+```
+
+
+## CodepipelineとEKSの接続
+
+deploymentとserviceをcodebuildから実行する
+
+deployment：ECRのリポジトリ内のimageを元にpod内にコンテナを立ち上げる
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-eks
+  labels:
+    app: eks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eks
+  template:
+    metadata:
+      labels:
+        app: eks
+    spec:
+      containers:
+      - name: eks-container
+        image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/sample-eks:v0.2
+        ports:
+        - protocol: TCP
+          8080
+```
+service: podに立ち上げたコンテナを外部に公開するための設定
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-eks
+  labels:
+    app: eks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eks
+  template:
+    metadata:
+      labels:
+        app: eks
+    spec:
+      containers:
+      - name: eks-container
+        image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/sample-eks:v0.2
+        ports:
+        - protocol: TCP
+          8080
+```
+
+buildspecのpost_buildでEKSを操作するように更新
+```yaml
+version: 0.2
+
+# env:
+  # variables:
+  #   AWS_ACCOUNT_ID: [${aws_account_id}]
+  #   AWS_DEEFAULT_REGION: ap-northeast-1
+  #   IMAGE_REPO_NAME: eks-private-repository
+
+phases:
+  pre_build:
+    commands:
+      - echo login ECR
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - export IMAGE_TAG="v0.2"
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image
+      - cd $CODEBUILD_SRC_DIR/ #接続したgithubのディレクトリ構造
+      - docker build -t $IMAGE_REPO_NAME .
+      - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Push completed on `date`
+      - aws eks update-kubeconfig --region  $AWS_DEEFAULT_REGION --name $EKS_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | kubectl apply -f ./deployment.yml | kubectl apply -f ./service.yml
 ```
 
 buildを実行して確認
