@@ -11,11 +11,56 @@ kubectl version | grep Client | cut -d : -f 5
 ```
 #"v1.22.6-eks-7d68063", GitCommit
 ```
+# 事前準備
+AWS CLIとkubectlをインストール
+## AWS CLIをインストール(Linux)
+[AWS CLIインストール方法](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-# kubectolをAWS経由でインストール
+Dockerを想定してLinuxにインストールする
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+```
+
+## AWS CLIでログイン
+```bash
+$ aws configure --profile $IAM_NAME #IAM_NAMEは任意
+AWS Access Key ID [None]: ${アクセスキー}
+AWS Secret Access Key [None]: ${シークレットアクセスキー}
+Default region name [None]: ap-northeast-1
+Default output format [None]: json
+```
+*アクセスキー・シークレットアクセスキーの確認
+
+IAM＞ユーザ＞${確認したいユーザ選択}＞認証情報＞アクセスキー
+(シークレットアクセスキーはアクセスキー作成時のみ確認可能(CSVにダウンロード可能))
+
+ユーザ切り替え
+```bash
+#オプションで--profileを付ける(一時的)
+aws s3 ls --profile $IAM_NAME
+#環境変数で切り替える
+export AWS_DEFAULT_PROFILE=$IAM_NAME
+```
+
+## kubectlをAWS経由でインストール
 S3バケットにkubectlのインストーラが公開されている
 [リンク](https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/install-kubectl.html)
 
+Dockerを想定してLinux(amd)にインストールする
+```bash
+curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.23.7/2022-06-29/bin/linux/amd64/kubectl
+#SHA-256 SUM 確認
+curl -o kubectl.sha256 https://s3.us-west-2.amazonaws.com/amazon-eks/1.23.7/2022-06-29/bin/linux/amd64/kubectl.sha256
+openssl sha1 -sha256 kubectl
+#実行権限を付与
+chmod +x ./kubectl
+#パスの設定
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+kubectl version --short --client
+```
 
 *clusterはeksctlコマンドで一発で作成可能
 ```
@@ -128,18 +173,7 @@ Amazon EKS リソースの VPC の範囲と重複しない
 
 ## CLIを利用してクラスタに接続
 
-CLIでログイン
-```bash
-#Access key IDとSecret access key, region, output(defaultはjson)を設定
-aws configure --profile $IAM_NAME
-```
-ユーザ切り替え
-```bash
-#オプションで--profileを付ける(一時的)
-aws s3 ls --profile $IAM_NAME
-#環境変数で切り替える
-export AWS_DEFAULT_PROFILE=$IAM_NAME
-```
+kotirasannkou
 
 ローカルでAWS上に作成したクラスタを操作可能にするためにconfigを設定
 ```bash
@@ -165,10 +199,15 @@ kubectl describe nodes
 ```
 
 
-### マネージドで実施する場合(EC2)
+### アンマネージドで実施する場合(EC2)
+アンマネージド=AWSがマネージしてくれないサービス
+
 ノードグループにIAMロールを割り当てる
 
 ノードグループ内では実際にはEC2が動作するため、EC2を信頼ポリシーに追加
+
+sts:AssumeRoleはRoleを引き受けるという意味
+
 ```json
 {
   "Version": "2012-10-17",
@@ -183,6 +222,9 @@ kubectl describe nodes
   ]
 }
 ```
+こちらをノードグループに付与すると、ノードグループがEC2を信頼する事ができる
+
+→ポリシーで許可したものを実行することができる。
 - AmazonEC2ContainerRegistryReadOnly
 
 ECR参照用
@@ -202,9 +244,11 @@ ECR参照用
 
 バージョンアップ中の利用不可能最大許容数
 
-### アンマネージドで実施する場合(fargate)
+### マネージドで実施する場合(fargate)
 
 
+
+# ECR(Elastic Container Registry)にDockerのimageをアップロード
 ## Dockerfileの設定
 チェックできれば良いのでシンプルにアパッチを導入
 
@@ -212,9 +256,10 @@ index.htmlを見れるようにしてある
 
 
 ## 作成したDockerのimageをAWSにアップロード
-アップロード先としてECR(Elastic Container Registry)を利用
+アップロード先としてECRを利用
 
 コンソールのレジストリの作成からプライベートリポジトリを作成
+
 *リポジトリ：同じ名前のDocker imageの集まり
 
 - 可視性設定
@@ -334,6 +379,17 @@ ECRとEKRにアクセスできる権限をcodebuildに付与する必要があ�
 ```
 
 buildを実行して確認
+
+codebuildからEKSのノードにデプロイ
+
+EKSはノード作成者は認証なしにデプロイ作業を実施できる、一方でcodeBuildはノード作成者ではないのでcodebuildがデプロイできるように認証してあげる必要がある。(codebuildでノード作成者の認証情報を入力しても実現できるが、シークレットキーをcodebuild環境変数に公開することになる)
+
+ノード作成者で実行
+```
+kubectl edit configmap aws-auth --namespace kube-system
+```
+
+
 
 
 ## codeDeployの設定
