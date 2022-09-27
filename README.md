@@ -511,8 +511,3 @@ aws eks update-kubeconfig --region ap-northeast-1 --name EKS-test
 ```
 
 ## codeDeployの設定
-
-
-残り
-- EKS+Codepipelineで変更できるか確認
-- 構成図の画像作成
