@@ -14,5 +14,3 @@ chkconfig httpd on
 
 #index.htmlの設置
 # aws s3 cp s3://udemy-vpc-shige-20220830/index.html /var/www/html/
-
-#test
