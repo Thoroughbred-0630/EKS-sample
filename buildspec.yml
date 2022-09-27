@@ -26,4 +26,4 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo Push completed on `date`
       - aws eks update-kubeconfig --region  $AWS_DEEFAULT_REGION --name $EKS_NAME
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | kubectl rollout restart -f ./deployment.yml | kubectl rollout restart -f ./service.yml
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | kubectl apply -f ./deployment.yml | kubectl apply -f ./service.yml

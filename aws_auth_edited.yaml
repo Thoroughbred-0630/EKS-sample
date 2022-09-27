@@ -15,7 +15,7 @@ data:
 #     username: codebuild
 #       groups:
 #         - system:masters
-  "- groups:\n  - system:bootstrappers\n  - system:nodes\n  rolearn: arn:aws:iam::681138372665:role/EKS-Node-Policy\n  username: system:node:{{EC2PrivateDNSName}}\n- rolearn: arn:aws:iam::681138372665:role/codebuild-EKS-connect-service-role\n  username: codebuild\n  groups:\n  - system:masters\n"
+  "- groups:\n  - system:bootstrappers\n  - system:nodes\n  rolearn: arn:aws:iam::681138372665:role/EKS-Node-Policy\n  username: system:node:{{EC2PrivateDNSName}}\n- rolearn: arn:aws:iam::681138372665:role/codebuild-EKS-build-connect-service-role\n  username: codebuild\n  groups:\n    - system:masters\n"
 #add to
 kind: ConfigMap
 metadata:
