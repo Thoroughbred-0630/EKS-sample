@@ -505,7 +505,10 @@ metadata:
   uid: efb57123-536f-41da-b5cd-f8ebc5c45c03
 
 ```
-
+変更をEKSに反映
+```bash
+aws eks update-kubeconfig --region ap-northeast-1 --name EKS-test
+```
 
 ## codeDeployの設定
 
