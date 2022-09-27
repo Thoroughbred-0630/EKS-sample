@@ -1,0 +1,22 @@
+version: '2.4'
+services:
+  awsdocker:
+    container_name: awsdocker
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+      args:
+        User: ${user}
+        Access_key: ${access_key}
+        Secret_access_key: ${secret_access_key}
+
+    working_dir: /home/${user}/workspace
+
+    user: ${user}
+
+    volumes:
+      - "./workspace:/home/${user}/workspace"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+    command: /bin/bash
+    tty: true
