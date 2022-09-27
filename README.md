@@ -481,7 +481,30 @@ EKSはノード作成者は認証なしにデプロイ作業を実施できる�
 kubectl edit configmap aws-auth --namespace kube-system
 ```
 
+```yaml
+apiVersion: v1
+data:
+  mapRoles: |
+  - groups:
+    - system:bootstrappers
+    - system:nodes
+    rolearn: arn:aws:iam::681138372665:role/EKS-Node-Policy
+    username: system:node:{{EC2PrivateDNSName}}
+#add from
+  - rolearn: arn:aws:iam::681138372665:role/${codebuildに設定したロール}
+    username: codebuild
+      groups:
+        - system:masters
+#add to
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-09-21T02:21:24Z"
+  name: aws-auth
+  namespace: kube-system
+  resourceVersion: "26626"
+  uid: efb57123-536f-41da-b5cd-f8ebc5c45c03
 
+```
 
 
 ## codeDeployの設定

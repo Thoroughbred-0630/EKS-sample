@@ -11,7 +11,7 @@ data:
     rolearn: arn:aws:iam::681138372665:role/EKS-Node-Policy
     username: system:node:{{EC2PrivateDNSName}}
 #add from
-  - rolearn: arn:aws:iam::681138372665:role/codebuild-EKS-build-service-role
+  - rolearn: arn:aws:iam::681138372665:role/codebuild-EKS-connect-service-role
     username: codebuild
       groups:
         - system:masters
