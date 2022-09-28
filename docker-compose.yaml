@@ -1,17 +1,17 @@
-version: '3.0'
-services:
-  eks:
-    container_name: eks
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        USER: ${USER}
+# version: '3.0'
+# services:
+#   eks:
+#     container_name: eks
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#       args:
+#         USER: ${USER}
 
-    volumes:
-      - "../workspace:/home/${USER}/workspace"
-    ports:
-      - 5353:5353
-    command: bash
-    tty: true
+#     volumes:
+#       - "../workspace:/home/${USER}/workspace"
+#     ports:
+#       - 5353:5353
+#     command: bash
+#     tty: true
       
