@@ -1,11 +1,11 @@
-FROM node:14.2.0 as builder
+# FROM node:14.2.0 as builder
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+# RUN mkdir -p /usr/src/app
+# WORKDIR /usr/src/app
 
-COPY ["package.json", "./"]
-RUN npm install
-COPY [".", "./"]
+# COPY ["package.json", "./"]
+# RUN npm install
+# COPY [".", "./"]
 # RUN npm run build
 
 FROM nginx:alpine
