@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sample-eks
+  name: eks-test
   labels:
-    app: eks
+    app: eks-test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: eks
+      app: eks-test
   template:
     metadata:
       labels:
-        app: eks
+        app: eks-test
     spec:
       containers:
-      - name: eks-container
+      - name: eks-test
         image: 681138372665.dkr.ecr.ap-northeast-1.amazonaws.com/eks:v0.2
         imagePullPolicy: Always
         ports:
