@@ -510,4 +510,16 @@ metadata:
 aws eks update-kubeconfig --region ap-northeast-1 --name EKS-test
 ```
 
+## aws-authのConfigファイルのテンプレートをアプライする(別解)
+```bash
+curl -o aws-auth-cm.yaml https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/aws-auth-cm.yaml
+```
+dataに以下を追加
+```yaml
+  - rolearn: arn:aws:iam::681138372665:role/${codebuildに設定したロール}
+    username: codebuild
+      groups:
+        - system:masters
+```
+
 ## codeDeployの設定
