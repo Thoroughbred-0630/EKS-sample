@@ -32,8 +32,8 @@ RUN echo '%wheel    ALL=(ALL)   NOPASSWD:ALL' >> /etc/sudoers
 RUN echo 'Defaults timestamp_timeout = 0' >> /etc/sudoers
 
 #setup ubuntu
-ENV DOCKER_CLIENT_VERSION=20.10.17
-ENV DOCKER_API_VERSION=1.41
+ENV DOCKER_CLIENT_VERSION=
+ENV DOCKER_API_VERSION=
 RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLIENT_VERSION}.tgz \
   | tar -xzC /usr/local/bin --strip=1 docker/docker
 
